@@ -11,7 +11,7 @@ const Layout = ({ children }) => {
 
   const getUserInfo = async () => {
     if (token) {
-      const res = await axios.get("http://localhost:8000/user/token", {
+      const res = await axios.get(`http://${process.env.BACK_IP}/user/token`, {
         headers: {
           Authorization: token,
         },
@@ -25,7 +25,7 @@ const Layout = ({ children }) => {
   const getFollower = async () => {
     let followerIds = [],
       followingIds = [];
-    const res = await axios.get("http://localhost:8000/user/follower", {
+    const res = await axios.get(`http://${process.env.BACK_IP}/user/follower`, {
       headers: {
         Authorization: axios.defaults.headers.common["x-access-token"],
       },
@@ -37,11 +37,14 @@ const Layout = ({ children }) => {
       });
     }
 
-    const res_1 = await axios.get("http://localhost:8000/user/following", {
-      headers: {
-        Authorization: axios.defaults.headers.common["x-access-token"],
-      },
-    });
+    const res_1 = await axios.get(
+      `http://${process.env.BACK_IP}/user/following`,
+      {
+        headers: {
+          Authorization: axios.defaults.headers.common["x-access-token"],
+        },
+      }
+    );
     if (res_1.data.data) {
       followingIds = res_1.data.data.followings.map((e) => {
         return e.id;

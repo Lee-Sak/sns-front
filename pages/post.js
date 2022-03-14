@@ -43,7 +43,7 @@ const Post = () => {
   }, []);
   const getPosts = async () => {
     dispatch({ type: "LOAD_POST_REQUEST" });
-    const postRes = await axios.get("http://localhost:8000/post");
+    const postRes = await axios.get(`http://${process.env.BACK_IP}/post`);
     const datas = postRes.data.data;
     dispatch({ type: "LOAD_POST_SUCCESS", data: datas });
   };
@@ -78,7 +78,7 @@ const Post = () => {
       };
 
       const response = await axios.post(
-        "http://localhost:8000/post",
+        `http://${process.env.BACK_IP}/post`,
         formData,
         config
       );
@@ -139,7 +139,7 @@ const Post = () => {
     };
 
     const response = await axios.put(
-      "http://localhost:8000/post/" + postId + `?ids=${imgId}`,
+      `http://${process.env.BACK_IP}/post/` + postId + `?ids=${imgId}`,
       formData,
       config
     );
@@ -234,7 +234,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
   async (context) => {
     console.log("server");
     context.store.dispatch({ type: "LOAD_POST_REQUEST" });
-    const postRes = await axios.get("http://localhost:8000/post");
+    const postRes = await axios.get(`http://${process.env.BACK_IP}/post`);
     const datas = postRes.data.data;
     context.store.dispatch({ type: "LOAD_POST_SUCCESS", data: datas });
   }

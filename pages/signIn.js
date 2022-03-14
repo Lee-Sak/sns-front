@@ -17,10 +17,13 @@ const SignIn = () => {
   const onSubmitForm = async () => {
     try {
       dispatch({ type: "LOG_IN_REQUEST" });
-      const response = await axios.post("http://localhost:8000/user/login", {
-        email: email.value,
-        password: password.value,
-      });
+      const response = await axios.post(
+        `http://${process.env.BACK_IP}/user/login`,
+        {
+          email: email.value,
+          password: password.value,
+        }
+      );
       if (response.data.status === "success") {
         dispatch({ type: "LOG_IN_DONE" });
         axios.defaults.headers.common["x-access-token"] =

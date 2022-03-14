@@ -15,7 +15,7 @@ const SignUp = () => {
 
   const onSubmitForm = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/user", {
+      const response = await axios.post(`http://${process.env.BACK_IP}/user`, {
         email: email.value,
         password: password.value,
         nickname: nick.value,

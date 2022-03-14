@@ -14,7 +14,7 @@ const MyPage = () => {
   const [emailCH, setemailCH] = useState("");
 
   const getMyInfo = async () => {
-    const res = await axios.get("http://localhost:8000/user/" + id, {
+    const res = await axios.get(`http://${process.env.BACK_IP}/user/` + id, {
       headers: {
         Authorization: token,
       },
@@ -56,7 +56,7 @@ const MyPage = () => {
   };
   const onClickEmailUpd = async () => {
     const res = await axios.put(
-      "http://localhost:8000/user/" + id,
+      `http://${process.env.BACK_IP}/user/` + id,
       {
         email: emailCH,
         nickname: nickCH,
@@ -72,7 +72,7 @@ const MyPage = () => {
 
   const onClickNickUpd = async () => {
     const res = await axios.put(
-      "http://localhost:8000/user/" + id,
+      `http://${process.env.BACK_IP}/user/` + id,
       {
         nickname: nickCH,
       },
@@ -90,7 +90,7 @@ const MyPage = () => {
 
   const onClickPwUpd = async () => {
     const res = await axios.patch(
-      "http://localhost:8000/user/" + id,
+      `http://${process.env.BACK_IP}/user/` + id,
       {
         password: pw,
       },

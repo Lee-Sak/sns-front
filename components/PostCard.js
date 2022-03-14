@@ -8,22 +8,28 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl }) => {
   const dispatch = useDispatch();
 
   const onClick = async (id) => {
-    const deleteRes = await axios.delete("http://localhost:8000/post/" + id, {
-      headers: {
-        Authorization: axios.defaults.headers.common["x-access-token"],
-      },
-    });
+    const deleteRes = await axios.delete(
+      `http://${process.env.BACK_IP}/post/` + id,
+      {
+        headers: {
+          Authorization: axios.defaults.headers.common["x-access-token"],
+        },
+      }
+    );
     if (deleteRes.data.status === "success") {
       dispatch({ type: "DELETE_POST", data: Number(id) });
     }
   };
 
   const updatedForm = async (id) => {
-    const postRes = await axios.get(`http://localhost:8000/post/${id}`, {
-      headers: {
-        Authorization: axios.defaults.headers.common["x-access-token"],
-      },
-    });
+    const postRes = await axios.get(
+      `http://${process.env.BACK_IP}/post/${id}`,
+      {
+        headers: {
+          Authorization: axios.defaults.headers.common["x-access-token"],
+        },
+      }
+    );
     const datas = postRes.data.data;
     const urls = datas.images.map((e) => {
       return e.url;
@@ -42,7 +48,7 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl }) => {
     });
   };
   const getFollower = async () => {
-    const res = await axios.get("http://localhost:8000/user/follower", {
+    const res = await axios.get(`http://${process.env.BACK_IP}/user/follower`, {
       headers: {
         Authorization: axios.defaults.headers.common["x-access-token"],
       },
@@ -57,11 +63,14 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl }) => {
       });
     }
 
-    const res_1 = await axios.get("http://localhost:8000/user/following", {
-      headers: {
-        Authorization: axios.defaults.headers.common["x-access-token"],
-      },
-    });
+    const res_1 = await axios.get(
+      `http://${process.env.BACK_IP}/user/following`,
+      {
+        headers: {
+          Authorization: axios.defaults.headers.common["x-access-token"],
+        },
+      }
+    );
     if (res_1.data.data) {
       followingIds = res_1.data.data.followings.map((e) => {
         return e.id;
@@ -74,7 +83,7 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl }) => {
 
   const onClickFollow = async () => {
     const followRes = await axios.post(
-      `http://localhost:8000/user/${userId}/follow`,
+      `http://${process.env.BACK_IP}/user/${userId}/follow`,
       {},
       {
         headers: {
@@ -90,7 +99,7 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl }) => {
 
   const onClickUnFollow = async () => {
     const followRes = await axios.put(
-      `http://localhost:8000/user/${userId}/unfollow`,
+      `http://${process.env.BACK_IP}/user/${userId}/unfollow`,
       {},
       {
         headers: {
