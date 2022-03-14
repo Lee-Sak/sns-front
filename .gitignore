@@ -38,4 +38,4 @@ yarn-error.log*
 react-nodebird.pem
 .env
 .next
-next.config.js
+/next.config.js
