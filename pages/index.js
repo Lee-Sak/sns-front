@@ -5,7 +5,6 @@ import styles from "../styles/Home.module.css";
 const Home = () => {
   return (
     <>
-      {process.env.BACK_IP}
       <h1>home</h1>
     </>
   );
