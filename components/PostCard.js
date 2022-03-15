@@ -132,19 +132,23 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl }) => {
             ))}
           <p>Writer [ {nick} ]</p>
         </div>
-        {userId === Number(id) && (
-          <>
-            <button
-              onClick={() => updatedForm(postId)}
-              style={{ float: "left" }}
-            >
-              수정
-            </button>
-            <button onClick={() => onClick(postId)} style={{ float: "right" }}>
-              삭제
-            </button>
-          </>
-        )}
+        {userId === Number(id) ||
+          (Number(id) === 1 && (
+            <>
+              <button
+                onClick={() => updatedForm(postId)}
+                style={{ float: "left" }}
+              >
+                수정
+              </button>
+              <button
+                onClick={() => onClick(postId)}
+                style={{ float: "right" }}
+              >
+                삭제
+              </button>
+            </>
+          ))}
       </Card>
       <div></div>
       <style jsx>{`
