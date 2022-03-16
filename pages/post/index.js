@@ -127,7 +127,7 @@ const Post = () => {
     // 이미지 resize 옵션 설정 (최대 width을 100px로 지정)
     const options = {
       maxSizeMB: 2,
-      maxWidthOrHeight: 100,
+      maxWidthOrHeight: 500,
     };
 
     try {

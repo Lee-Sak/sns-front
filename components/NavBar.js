@@ -17,7 +17,7 @@ const NavBar = () => {
   return (
     <>
       <nav>
-        <img src="/vercel.svg" />
+        <img src="http://www.idncomm.com/data/bbs/idn_pofolio_2012/2012122819221964.jpg" />
         <div>
           <Link href="/">
             <a className={router.pathname === "/" ? "active" : ""}>Home</a>
