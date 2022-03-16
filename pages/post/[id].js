@@ -12,7 +12,7 @@ const Detail = () => {
   const router = useRouter();
   const { id } = router.query;
   const dispatch = useDispatch();
-
+  const userId = useSelector((state) => state.user.id);
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -62,14 +62,22 @@ const Detail = () => {
                 return <img src={e.url} key={e.id} />;
               })}
               <p>{post.sentence}</p>
-              <p>Writer [ {post.user.nickname} ]</p>
+              <p>Writer [ {post.nickname} ]</p>
             </div>
-            <button onClick={oneClickBack} style={{ float: "left" }}>
-              뒤로
-            </button>
-            <button onClick={onClick} style={{ float: "right" }}>
-              삭제
-            </button>
+            {post.user_id === Number(userId) ? (
+              <>
+                <button onClick={oneClickBack} style={{ float: "left" }}>
+                  뒤로
+                </button>
+                <button onClick={onClick} style={{ float: "right" }}>
+                  삭제
+                </button>
+              </>
+            ) : (
+              <div>
+                <button onClick={oneClickBack}>뒤로</button>
+              </div>
+            )}
           </Card>
         </div>
       )}

@@ -24,7 +24,6 @@ const SignIn = () => {
           password: password.value,
         }
       );
-      console.log(response);
 
       if (response.data.status === "success") {
         dispatch({ type: "LOG_IN_DONE" });
