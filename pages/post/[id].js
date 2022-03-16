@@ -16,10 +16,11 @@ const Detail = () => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+
   const getPostOne = async () => {
     setLoading(true);
     const postRes = await axios.get(`http://${process.env.BACK_IP}/post/${id}`);
-
+    console.log("postRes:", postRes);
     const datas = postRes.data.data;
     console.log(datas);
     setPost(datas);

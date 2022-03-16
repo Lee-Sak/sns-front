@@ -96,6 +96,7 @@ const post = (state = initialState, action) => {
         ...state,
         imgSrc: [],
         content: "",
+        sentence: "",
         files: [],
         updatePostStatus: false,
         addPostStatus: true,

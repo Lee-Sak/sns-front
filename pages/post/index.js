@@ -92,13 +92,6 @@ const Post = () => {
       const { status, data } = response.data;
 
       if (status === "success") {
-        const post = {
-          id: data.id,
-          content: data.content,
-          user_id: data.user.id,
-          nickname: data.user.nickname,
-          img_url: data.images[0].url,
-        };
         // dispatch({ type: "CREATE_POST_SUCCESS", data: post });
         getPosts();
       } else {
@@ -206,7 +199,7 @@ const Post = () => {
               </div>
             );
           })}
-          <input placeholder="content" value={content} onChange={onChange} />
+          <input placeholder="title" value={content} onChange={onChange} />
           <textarea
             rows="6"
             cols="40"

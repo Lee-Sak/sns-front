@@ -141,6 +141,8 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl, sentence }) => {
             ) : (
               <button onClick={onClickFollow}>팔로우</button>
             ))}
+          <p>{sentence} </p>
+
           <p>Writer [ {nick} ]</p>
         </div>
         {(userId === Number(id) || Number(id) === 1) && (
