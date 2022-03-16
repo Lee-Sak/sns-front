@@ -112,7 +112,7 @@ const Detail = () => {
             <h1>Comment:</h1>
             {comments.map((e) => {
               return (
-                <div>
+                <div key={e.id}>
                   <Card title={`Writer [${e.nick}]`} style={{ width: 300 }}>
                     <p>{e.comment}</p>
                   </Card>
