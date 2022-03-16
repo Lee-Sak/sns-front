@@ -28,11 +28,16 @@ const Post = () => {
     imgs,
     postId,
     imgId,
+    sentence,
   } = useSelector((state) => state.post);
   const { isLoggedIn } = useSelector((state) => state.user);
 
   const onChange = (e) => {
     dispatch({ type: "SET_CONTENT", data: e.target.value });
+  };
+
+  const onChangeSentence = (e) => {
+    dispatch({ type: "SET_SENTENCE", data: e.target.value });
   };
 
   useEffect(() => {
@@ -70,6 +75,7 @@ const Post = () => {
         formData.append("files", e);
       }
       formData.append("content", content);
+      formData.append("sentence", sentence);
 
       const config = {
         headers: {
@@ -152,6 +158,7 @@ const Post = () => {
       formData.append("files", e);
     }
     formData.append("content", content);
+    formData.append("sentence", sentence);
 
     const config = {
       headers: {
@@ -199,12 +206,13 @@ const Post = () => {
               </div>
             );
           })}
+          <input placeholder="content" value={content} onChange={onChange} />
           <textarea
             rows="6"
             cols="40"
-            placeholder="content"
-            value={content}
-            onChange={onChange}
+            placeholder="sentence"
+            value={sentence}
+            onChange={onChangeSentence}
           />
           {updatePostStatus ? (
             <button onClick={addUpdate}>수정</button>
@@ -226,6 +234,7 @@ const Post = () => {
               <PostCard
                 idx={i}
                 key={post.id}
+                sentence={post.sentence}
                 userId={post.user_id}
                 postId={post.id}
                 imgUrl={post.img_url}

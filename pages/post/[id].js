@@ -60,6 +60,7 @@ const Detail = () => {
               {post.images.map((e) => {
                 return <img src={e.url} key={e.id} />;
               })}
+              <p>{post.sentence}</p>
               <p>Writer [ {post.user.nickname} ]</p>
             </div>
             <button onClick={oneClickBack} style={{ float: "left" }}>

@@ -5,7 +5,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
-const PostCard = ({ idx, postId, userId, nick, content, imgUrl }) => {
+const PostCard = ({ idx, postId, userId, nick, content, imgUrl, sentence }) => {
   const { id, follower, following } = useSelector((state) => state.user);
   const { detailPostStatus, setDetialPostStatus } = useState(false);
   const dispatch = useDispatch();
@@ -49,6 +49,7 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl }) => {
         image: urls,
         postId: id,
         ids,
+        sentence: datas.sentence,
       },
     });
   };

@@ -12,6 +12,7 @@ const initialState = {
   imgs: [],
   postId: "",
   imgId: [],
+  sentence: "",
 };
 
 const LOAD_POST_REQUEST = "LOAD_POST_REQUEST";
@@ -85,6 +86,11 @@ const post = (state = initialState, action) => {
           ...state.data.filter((e, i) => e.id !== action.data.id),
         ],
       };
+    case "SET_SENTENCE":
+      return {
+        ...state,
+        sentence: action.data,
+      };
     case ADD_POST_FORM:
       return {
         ...state,
@@ -109,6 +115,7 @@ const post = (state = initialState, action) => {
         imgSrc: [...action.data.image],
         postId: action.data.postId,
         imgId: action.data.ids,
+        sentence: action.data.sentence,
       };
 
     case "ADD_FILES":

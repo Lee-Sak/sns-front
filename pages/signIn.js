@@ -16,7 +16,6 @@ const SignIn = () => {
   );
   const onSubmitForm = async () => {
     try {
-      console.log("a");
       dispatch({ type: "LOG_IN_REQUEST" });
       const response = await axios.post(
         `http://${process.env.BACK_IP}/user/login`,
