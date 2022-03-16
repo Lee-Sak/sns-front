@@ -16,6 +16,7 @@ const SignIn = () => {
   );
   const onSubmitForm = async () => {
     try {
+      console.log("a");
       dispatch({ type: "LOG_IN_REQUEST" });
       const response = await axios.post(
         `http://${process.env.BACK_IP}/user/login`,
@@ -24,6 +25,8 @@ const SignIn = () => {
           password: password.value,
         }
       );
+      console.log(response);
+
       if (response.data.status === "success") {
         dispatch({ type: "LOG_IN_DONE" });
         axios.defaults.headers.common["x-access-token"] =
@@ -34,17 +37,16 @@ const SignIn = () => {
           router.push("/");
         }
         alert("Login Success!");
-      } else {
-        dispatch({ type: "LOG_IN_ERROR" });
       }
     } catch (error) {
-      console.log(error);
+      alert("로그인 정보를 확인하세요!");
+      dispatch({ type: "LOG_IN_ERROR" });
     }
   };
   return (
     <>
       {loginLoading && <div>loading...</div>}
-      {loginError && <div>Error...</div>}
+      {loginError && <div>아이디와 비밀번호를 확인하세요..</div>}
       <div>
         <Form onFinish={onSubmitForm}>
           <div>
