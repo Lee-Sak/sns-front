@@ -33,7 +33,7 @@ const Layout = ({ children }) => {
 
     if (res.data.data) {
       followerIds = res.data.data.followers.map((e) => {
-        return e.id;
+        return { id: e.id, nick: e.nickname };
       });
     }
 
@@ -47,7 +47,7 @@ const Layout = ({ children }) => {
     );
     if (res_1.data.data) {
       followingIds = res_1.data.data.followings.map((e) => {
-        return e.id;
+        return { id: e.id, nick: e.nickname };
       });
     }
 

@@ -10,19 +10,46 @@ const UserProfile = ({ token, getFollower }) => {
   const { nick, isLoggedIn, follower, following } = useSelector(
     (state) => state.user
   );
-
+  const [status, setStatus] = useState(false);
+  const onClick = () => {
+    setStatus(true);
+  };
+  const onClickDelete = () => {
+    setStatus(false);
+  };
   return (
     <>
       {isLoggedIn && (
         <Card
           title={`${nick}님`}
-          extra={<a href="#">More</a>}
+          extra={<a onClick={onClick}>More</a>}
           style={{ width: 200 }}
         >
           <p>follower : {follower?.length}</p>
           <p>following : {following?.length}</p>
         </Card>
       )}
+      {status && (
+        <Card
+          title="follow list"
+          extra={<a onClick={onClickDelete}>접기</a>}
+          style={{ width: 200 }}
+        >
+          <p>
+            follower :{" "}
+            {follower.map((e) => {
+              return `${e.nick}, `;
+            })}
+          </p>
+          <p>
+            following :{" "}
+            {following.map((e) => {
+              return `${e.nick}, `;
+            })}
+          </p>
+        </Card>
+      )}
+
       <style jsx>{`
         nav {
           display: flex;
