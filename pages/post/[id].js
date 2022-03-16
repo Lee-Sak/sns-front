@@ -16,14 +16,21 @@ const Detail = () => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
-
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
   const getPostOne = async () => {
     setLoading(true);
     const postRes = await axios.get(`http://${process.env.BACK_IP}/post/${id}`);
-    console.log("postRes:", postRes);
     const datas = postRes.data.data;
+
+    const commentRes = await axios.get(
+      `http://${process.env.BACK_IP}/post/${id}/comment`
+    );
+    const commentsData = commentRes.data.data;
     console.log(datas);
     setPost(datas);
+    setComments(commentsData);
+
     setLoading(false);
 
     setDone(true);
@@ -50,39 +57,84 @@ const Detail = () => {
   useEffect(() => {
     getPostOne();
   }, []);
+  const onChangeComment = (e) => {
+    setCommentText(e.target.value);
+  };
 
+  const onClickComment = async () => {
+    const commentPost = await axios.post(
+      `http://${process.env.BACK_IP}/post/${id}/comment`,
+      { comment: commentText },
+      {
+        headers: {
+          Authorization: axios.defaults.headers.common["x-access-token"],
+        },
+      }
+    );
+    if (commentPost.data.status === "success") {
+      getPostOne();
+
+      setCommentText("");
+    }
+  };
   return (
     <>
       {loading && "Loading..."}
       {done && (
-        <div>
-          <Card title={post.content} style={{ width: 300 }}>
-            <div>
-              {post.images.map((e) => {
-                return <img src={e.url} key={e.id} />;
-              })}
-              <p>{post.sentence}</p>
-              <p>Writer [ {post.nickname} ]</p>
-            </div>
-            {post.user_id === Number(userId) ? (
-              <>
-                <button onClick={oneClickBack} style={{ float: "left" }}>
-                  뒤로
-                </button>
-                <button onClick={onClick} style={{ float: "right" }}>
-                  삭제
-                </button>
-              </>
-            ) : (
-              <div>
-                <button onClick={oneClickBack}>뒤로</button>
+        <>
+          <div className="a">
+            <h1>Post:</h1>
+            <Card title={post.content} style={{ width: 300 }}>
+              <div className="a">
+                {post.images.map((e) => {
+                  return <img src={e.url} key={e.id} />;
+                })}
+                <p>{post.sentence}</p>
+                <p>Writer [ {post.nickname} ]</p>
               </div>
-            )}
-          </Card>
-        </div>
+              {post.user_id === Number(userId) ? (
+                <>
+                  <button onClick={oneClickBack} style={{ float: "left" }}>
+                    뒤로
+                  </button>
+                  <button onClick={onClick} style={{ float: "right" }}>
+                    삭제
+                  </button>
+                </>
+              ) : (
+                <div>
+                  <button onClick={oneClickBack}>뒤로</button>
+                </div>
+              )}
+            </Card>
+          </div>
+          <div className="a">
+            <h1>Comment:</h1>
+            {comments.map((e) => {
+              return (
+                <div>
+                  <Card title={`Writer [${e.nick}]`} style={{ width: 300 }}>
+                    <p>{e.comment}</p>
+                  </Card>
+                </div>
+              );
+            })}
+            <div className="a">
+              <h2>Comment Write:</h2>
+              <textarea
+                rows="6"
+                cols="40"
+                placeholder="sentence"
+                onChange={onChangeComment}
+                value={commentText}
+              />
+            </div>
+            <button onClick={onClickComment}>write</button>
+          </div>
+        </>
       )}
       <style jsx>{`
-        div {
+        div.a {
           display: flex;
           gap: 10px;
           flex-direction: column;
