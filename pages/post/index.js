@@ -1,10 +1,11 @@
 import axios from "axios";
-import { PostCard } from "../components/PostCard";
+import { PostCard } from "../../components/PostCard";
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import wrapper from "../store/configureStore";
-import { useInput } from "../hooks/useInput";
+import wrapper from "../../store/configureStore";
+import { useInput } from "../../hooks/useInput";
 import { useRouter } from "next/router";
+import imageCompression from "browser-image-compression";
 
 const Post = () => {
   const maxLen = (value) => value.length < 100;
@@ -121,6 +122,27 @@ const Post = () => {
     window.scrollTo(0, 0);
   }
 
+  const handleFileOnChange = async (e) => {
+    let file = e.target.files[0]; // 입력받은 file객체
+    // 이미지 resize 옵션 설정 (최대 width을 100px로 지정)
+    const options = {
+      maxSizeMB: 2,
+      maxWidthOrHeight: 100,
+    };
+
+    try {
+      const compressedFile = await imageCompression(file, options);
+      dispatch({ type: "ADD_FILES", data: compressedFile });
+      // resize된 이미지의 url을 받아 fileUrl에 저장
+      const promise = imageCompression.getDataUrlFromFile(compressedFile);
+      promise.then((result) => {
+        dispatch({ type: "ADD_IMAGE_SOURCE", data: result });
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const onClickImgDel = (i) => {
     dispatch({ type: "DELETE_IMG", data: Number(i) });
   };
@@ -168,7 +190,7 @@ const Post = () => {
       {addPostStatus ? (
         <div>
           <h2>이미지 미리보기</h2>
-          <input type="file" onChange={onChangeFile} />
+          <input type="file" onChange={handleFileOnChange} />
           {imgSrc.map((e, i) => {
             return (
               <div key={i} className="preview">

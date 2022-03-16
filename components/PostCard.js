@@ -2,10 +2,15 @@ import { Card } from "antd";
 import "antd/dist/antd.css";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
+import { useState } from "react";
+import { useRouter } from "next/router";
 
 const PostCard = ({ idx, postId, userId, nick, content, imgUrl }) => {
   const { id, follower, following } = useSelector((state) => state.user);
+  const { detailPostStatus, setDetialPostStatus } = useState(false);
   const dispatch = useDispatch();
+  const [onePost, setOnePost] = useState(null);
+  const router = useRouter();
 
   const onClick = async (id) => {
     const deleteRes = await axios.delete(
@@ -112,12 +117,17 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl }) => {
       getFollower();
     }
   };
+
+  const onClickMore = () => {
+    router.push(`/post/${postId}`);
+  };
+
   return (
     <>
       <Card
         key={idx}
         title={`${idx}. ${content}`}
-        extra={<a href="#">More</a>}
+        extra={<a onClick={onClickMore}>More</a>}
         style={{ width: 300 }}
       >
         <div>
@@ -146,7 +156,6 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl }) => {
           </>
         )}
       </Card>
-      <div></div>
       <style jsx>{`
         div {
           display: flex;

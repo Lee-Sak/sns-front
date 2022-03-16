@@ -4,6 +4,7 @@ const initialState = {
   loadPostDone: false,
   addPostStatus: false,
   updatePostStatus: false,
+  detailPostStatus: false,
   data: [],
   files: [],
   imgSrc: [],

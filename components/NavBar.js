@@ -24,7 +24,16 @@ const NavBar = () => {
           </Link>
 
           <Link href="/post">
-            <a className={router.pathname === "/post" ? "active" : ""}>Post</a>
+            <a
+              className={
+                router.pathname === "/post" ||
+                router.pathname.split("/")[1] === "post"
+                  ? "active"
+                  : ""
+              }
+            >
+              Post
+            </a>
           </Link>
           {token ? (
             <Link href="/mypage">
