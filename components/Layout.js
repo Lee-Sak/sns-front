@@ -64,7 +64,7 @@ const Layout = ({ children }) => {
         <UserProfile token={token} />
         {children}
       </div>
-      <style jsx>{`
+      {/* <style jsx>{`
         div.container {
           width: 100vw;
           height: 100vh;
@@ -79,7 +79,7 @@ const Layout = ({ children }) => {
           background-size: cover;
           opacity: 1;
         }
-      `}</style>
+      `}</style> */}
     </div>
   );
 };

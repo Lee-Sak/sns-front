@@ -6,7 +6,7 @@ const Home = () => {
   return (
     <>
       <div>
-        <img width="380px" height="600px" src="imageedit_2_7402640519.png" />
+        <img width="380px" height="600px" src="246BD24252FF853D15.jpg" />
       </div>
       <style jsx>{`
         div {

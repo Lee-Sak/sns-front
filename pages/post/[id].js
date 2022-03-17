@@ -18,6 +18,13 @@ const Detail = () => {
   const [done, setDone] = useState(false);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
+  const [subCommentStatus, setCommentStatus] = useState(true);
+  const [subComment, setSubComment] = useState("");
+  const carouselRef = useRef([]);
+  const [inputRefIndex, setinputRefIndex] = useState("");
+  const [statusAddRefCom, setStatusAddRefCom] = useState(false);
+  const [subcommentojb, setsubcommentojb] = useState([]);
+
   const getPostOne = async () => {
     setLoading(true);
     const postRes = await axios.get(`http://${process.env.BACK_IP}/post/${id}`);
@@ -27,13 +34,65 @@ const Detail = () => {
       `http://${process.env.BACK_IP}/post/${id}/comment`
     );
     const commentsData = commentRes.data.data;
-    console.log(datas);
+    console.log(commentsData);
+
+    const array_ = [];
+    for (const e of commentsData) {
+      if (e.subComment.length > 0) {
+        const postRes = await axios.get(
+          `http://${process.env.BACK_IP}/post/${e.id}/subcomment`
+        );
+        console.log("postRes:", postRes);
+        if (postRes.data.status === "success") {
+          const data = postRes.data.data;
+          const subarray = data.map((data) => {
+            return {
+              id: data.id,
+              sub_comment: data.sub_comment,
+              user_nick: data.user.nickname,
+              user_id: data.user.id,
+            };
+          });
+
+          array_.push({
+            ...e,
+            subarray,
+          });
+        }
+      } else {
+        const subarray = [];
+        array_.push({
+          ...e,
+          subarray,
+        });
+      }
+    }
+    console.log("array:", array_);
+
     setPost(datas);
-    setComments(commentsData);
+    setComments(array_);
 
     setLoading(false);
 
     setDone(true);
+  };
+
+  const onClickDelete = async (id) => {
+    console.log(id);
+    const deleteRes = await axios.delete(
+      `http://${process.env.BACK_IP}/post/comment/` + id,
+      {
+        headers: {
+          Authorization: axios.defaults.headers.common["x-access-token"],
+        },
+      }
+    );
+    if (deleteRes.data.status === "success") {
+      alert("정상적으로 삭제되었습니다.");
+      getPostOne();
+
+      // setComments((prev) => prev.filter((comm) => comm.id !== id));
+    }
   };
 
   const onClick = async () => {
@@ -77,6 +136,65 @@ const Detail = () => {
       setCommentText("");
     }
   };
+  const onChangeServe = (e) => {
+    setSubComment(e.target.value);
+  };
+
+  const onClickPostServeComment = async (commentId) => {
+    const commentPost = await axios.post(
+      `http://${process.env.BACK_IP}/post/${commentId}/subcomment`,
+      { sub_comment: subComment },
+      {
+        headers: {
+          Authorization: axios.defaults.headers.common["x-access-token"],
+        },
+      }
+    );
+    if (commentPost.data.status === "success") {
+      getPostOne();
+      setSubComment("");
+      setStatusAddRefCom(false);
+    }
+  };
+
+  const addSubCommentDiv = (commentId) => {
+    return (
+      <div className="a">
+        <textarea
+          rows="3"
+          cols="43"
+          placeholder="subComment"
+          onChange={onChangeServe}
+          value={subComment}
+        />
+        <div>
+          <button onClick={() => onClickPostServeComment(commentId)}>
+            작성
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const onClickAddSubComment = async (i) => {
+    setStatusAddRefCom(true);
+    setinputRefIndex(i);
+  };
+
+  const onClickDelSub = async (id) => {
+    const deleteRes = await axios.delete(
+      `http://${process.env.BACK_IP}/post/comment/subcomment/` + id,
+      {
+        headers: {
+          Authorization: axios.defaults.headers.common["x-access-token"],
+        },
+      }
+    );
+    if (deleteRes.data.status === "success") {
+      alert("정상적으로 삭제되었습니다.");
+      getPostOne();
+    }
+  };
   return (
     <>
       {loading && "Loading..."}
@@ -109,13 +227,57 @@ const Detail = () => {
             </Card>
           </div>
           <div className="a">
-            <h1>Comment:</h1>
-            {comments.map((e) => {
+            <h1>{"< Comment >"} </h1>
+            {comments.map((e, i) => {
               return (
-                <div key={e.id}>
-                  <Card title={`Writer [${e.nick}]`} style={{ width: 300 }}>
+                <div key={e.id} ref={(elem) => (carouselRef.current[i] = elem)}>
+                  <Card
+                    title={`Writer [${e.nick}]`}
+                    style={{ width: 300, background: "#ffe4c4" }}
+                  >
                     <p>{e.comment}</p>
+                    {(Number(userId) === e.user_id || Number(userId) === 1) && (
+                      <button
+                        style={{ float: "left" }}
+                        onClick={() => onClickDelete(e.id)}
+                      >
+                        삭제
+                      </button>
+                    )}
+                    <button
+                      style={{ float: "right" }}
+                      onClick={() => onClickAddSubComment(i)}
+                    >
+                      답글
+                    </button>
                   </Card>
+                  <div className="a">
+                    {e.subarray.length > 0 && <h2 color="blue">SubComment </h2>}
+
+                    {e.subarray?.map((e) => {
+                      return (
+                        <div key={e.id}>
+                          <Card
+                            title={`Writer [${e.user_nick}]`}
+                            style={{
+                              width: 200,
+                              height: 150,
+                              background: "#f5f5dc",
+                            }}
+                          >
+                            <p>{e.sub_comment}</p>
+                            {(Number(userId) === e.user_id ||
+                              Number(userId) === 1) && (
+                              <button onClick={() => onClickDelSub(e.id)}>
+                                삭제
+                              </button>
+                            )}
+                          </Card>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {inputRefIndex === i && addSubCommentDiv(e.id)}
                 </div>
               );
             })}
