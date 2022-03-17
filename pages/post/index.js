@@ -30,7 +30,11 @@ const Post = () => {
     imgId,
     sentence,
   } = useSelector((state) => state.post);
+
   const { isLoggedIn } = useSelector((state) => state.user);
+
+  const [followerId, setFollowerId] = useState([]);
+  const [followingId, setfollowingId] = useState([]);
 
   const onChange = (e) => {
     dispatch({ type: "SET_CONTENT", data: e.target.value });
@@ -40,11 +44,59 @@ const Post = () => {
     dispatch({ type: "SET_SENTENCE", data: e.target.value });
   };
 
+  const getFollower = async () => {
+    const res = await axios.get(`http://${process.env.BACK_IP}/user/follower`, {
+      headers: {
+        Authorization: axios.defaults.headers.common["x-access-token"],
+      },
+    });
+
+    let followerIds = [],
+      followingIds = [];
+
+    let a = [],
+      b = [];
+
+    if (res.data.data) {
+      followerIds = res.data.data.followers.map((e) => {
+        return { id: e.id, nick: e.nickname };
+      });
+      a = res.data.data.followers.map((e) => {
+        return e.id;
+      });
+    }
+
+    const res_1 = await axios.get(
+      `http://${process.env.BACK_IP}/user/following`,
+      {
+        headers: {
+          Authorization: axios.defaults.headers.common["x-access-token"],
+        },
+      }
+    );
+    if (res_1.data.data) {
+      followingIds = res_1.data.data.followings.map((e) => {
+        return { id: e.id, nick: e.nickname };
+      });
+      b = res_1.data.data.followings.map((e) => {
+        return e.id;
+      });
+    }
+
+    dispatch({ type: "follower", data: followerIds });
+    dispatch({ type: "following", data: followingIds });
+
+    setFollowerId(a);
+    setfollowingId(b);
+  };
+
   useEffect(() => {
     const currentUrl = router.asPath;
     if (!isLoggedIn) {
       router.push(`/signIn/?returnUrl=${currentUrl}`);
       alert("로그인 먼저 진행하세요");
+    } else {
+      getFollower();
     }
   }, []);
   const getPosts = async () => {
@@ -233,6 +285,9 @@ const Post = () => {
                 imgUrl={post.img_url}
                 content={post.content}
                 nick={post.nickname}
+                getFollower={getFollower}
+                followerId={followerId}
+                followingId={followingId}
               />
             ))}
           </div>

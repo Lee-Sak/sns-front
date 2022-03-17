@@ -5,7 +5,18 @@ import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
-const PostCard = ({ idx, postId, userId, nick, content, imgUrl, sentence }) => {
+const PostCard = ({
+  idx,
+  postId,
+  userId,
+  nick,
+  content,
+  imgUrl,
+  sentence,
+  getFollower,
+  followerId,
+  followingId,
+}) => {
   const { id, follower, following } = useSelector((state) => state.user);
   const { detailPostStatus, setDetialPostStatus } = useState(false);
   const dispatch = useDispatch();
@@ -22,6 +33,7 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl, sentence }) => {
       }
     );
     if (deleteRes.data.status === "success") {
+      alert("삭제 되었습니다.");
       dispatch({ type: "DELETE_POST", data: Number(id) });
     }
   };
@@ -52,39 +64,6 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl, sentence }) => {
         sentence: datas.sentence,
       },
     });
-  };
-  const getFollower = async () => {
-    const res = await axios.get(`http://${process.env.BACK_IP}/user/follower`, {
-      headers: {
-        Authorization: axios.defaults.headers.common["x-access-token"],
-      },
-    });
-
-    let followerIds = [],
-      followingIds = [];
-
-    if (res.data.data) {
-      followerIds = res.data.data.followers.map((e) => {
-        return e.id;
-      });
-    }
-
-    const res_1 = await axios.get(
-      `http://${process.env.BACK_IP}/user/following`,
-      {
-        headers: {
-          Authorization: axios.defaults.headers.common["x-access-token"],
-        },
-      }
-    );
-    if (res_1.data.data) {
-      followingIds = res_1.data.data.followings.map((e) => {
-        return e.id;
-      });
-    }
-
-    dispatch({ type: "follower", data: followerIds });
-    dispatch({ type: "following", data: followingIds });
   };
 
   const onClickFollow = async () => {
@@ -123,6 +102,7 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl, sentence }) => {
     router.push(`/post/${postId}`);
   };
 
+  console.log(followerId);
   return (
     <>
       <Card
@@ -136,7 +116,7 @@ const PostCard = ({ idx, postId, userId, nick, content, imgUrl, sentence }) => {
         </div>
         <div>
           {userId !== Number(id) &&
-            (follower.includes(userId) ? (
+            (followerId.includes(userId) ? (
               <button onClick={onClickUnFollow}>언팔로우</button>
             ) : (
               <button onClick={onClickFollow}>팔로우</button>

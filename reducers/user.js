@@ -7,11 +7,24 @@ const initialState = {
   nick: "",
   follower: [],
   following: [],
+
   email: "",
 };
 
 const user = (state = initialState, action) => {
   switch (action.type) {
+    case "FOLLOWER_NICK":
+      return {
+        ...state,
+        followerNick: [...action.data],
+      };
+
+    case "FOLLOWING_NICK":
+      return {
+        ...state,
+        followingNick: [...action.data],
+      };
+
     case "LOG_IN_REQUEST":
       return {
         ...state,

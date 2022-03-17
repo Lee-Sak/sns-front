@@ -64,7 +64,7 @@ const Layout = ({ children }) => {
         <UserProfile token={token} />
         {children}
       </div>
-      {/* <style jsx>{`
+      <style jsx>{`
         div.container {
           width: 100vw;
           height: 100vh;
@@ -73,13 +73,13 @@ const Layout = ({ children }) => {
         div.img_item {
           margin: 0 auto;
 
-          background-image: url("photo-1553095066-5014bc7b7f2d.jpg");
+          background-image: url("photo-1553095066-5014bc7b7f2d.jp");
           background-repeat: no-repeat;
           background-position: center center;
           background-size: cover;
           opacity: 1;
         }
-      `}</style> */}
+      `}</style>
     </div>
   );
 };
