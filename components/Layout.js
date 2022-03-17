@@ -58,11 +58,29 @@ const Layout = ({ children }) => {
     getFollower();
   }
   return (
-    <>
-      <NavBar />
-      <UserProfile token={token} />
-      <div>{children}</div>
-    </>
+    <div className="container">
+      <div className="img_item">
+        <NavBar />
+        <UserProfile token={token} />
+        {children}
+      </div>
+      <style jsx>{`
+        div.container {
+          width: 100vw;
+          height: 100vh;
+        }
+
+        div.img_item {
+          margin: 0 auto;
+
+          background-image: url("photo-1553095066-5014bc7b7f2d.jpg");
+          background-repeat: no-repeat;
+          background-position: center center;
+          background-size: cover;
+          opacity: 1;
+        }
+      `}</style>
+    </div>
   );
 };
 

@@ -20,61 +20,43 @@ const UserProfile = ({ token, getFollower }) => {
   return (
     <>
       {isLoggedIn && (
-        <Card
-          title={`${nick}님`}
-          extra={<a onClick={onClick}>More</a>}
-          style={{ width: 200 }}
-        >
-          <p>follower : {follower?.length}</p>
-          <p>following : {following?.length}</p>
-        </Card>
+        <div>
+          <Card
+            title={`${nick}님`}
+            extra={<a onClick={onClick}>More</a>}
+            style={{ width: 170 }}
+          >
+            <p>follower : {follower?.length}</p>
+            <p>following : {following?.length}</p>
+          </Card>
+        </div>
       )}
       {status && (
-        <Card
-          title="follow list"
-          extra={<a onClick={onClickDelete}>접기</a>}
-          style={{ width: 200 }}
-        >
-          <p>
-            follower :{" "}
-            {follower.map((e) => {
-              return `${e.nick}, `;
-            })}
-          </p>
-          <p>
-            following :{" "}
-            {following.map((e) => {
-              return `${e.nick}, `;
-            })}
-          </p>
-        </Card>
+        <div>
+          <Card
+            title="follow list"
+            extra={<a onClick={onClickDelete}>접기</a>}
+            style={{ width: 170 }}
+          >
+            <p>
+              follower :{" "}
+              {follower.map((e) => {
+                return `${e.nick}, `;
+              })}
+            </p>
+            <p>
+              following :{" "}
+              {following.map((e) => {
+                return `${e.nick}, `;
+              })}
+            </p>
+          </Card>
+        </div>
       )}
 
       <style jsx>{`
-        nav {
-          display: flex;
-          gap: 10px;
-          flex-direction: column;
-          align-items: center;
-          padding-top: 20px;
-          padding-bottom: 10px;
-          box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
-            rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
-        }
-        img {
-          max-width: 100px;
-          margin-bottom: 5px;
-        }
-        nav a {
-          font-weight: 600;
-          font-size: 18px;
-        }
-        .active {
-          color: tomato;
-        }
-        nav div {
-          display: flex;
-          gap: 10px;
+        div {
+          display: inline;
         }
       `}</style>
     </>

@@ -6,11 +6,7 @@ const Home = () => {
   return (
     <>
       <div>
-        <img
-          width="300px"
-          height="450px"
-          src="https://t1.daumcdn.net/cfile/tistory/11090E455020B14139"
-        />
+        <img width="380px" height="600px" src="imageedit_2_7402640519.png" />
       </div>
       <style jsx>{`
         div {
@@ -22,6 +18,9 @@ const Home = () => {
           padding-bottom: 10px;
           box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
             rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+        }
+        img {
+          opacity: 0.8;
         }
       `}</style>
     </>
