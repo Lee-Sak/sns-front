@@ -76,6 +76,9 @@ const SignIn = () => {
             </Button>
           </div>
         </Form>
+        <div>
+          <img width="380px" height="520px" src="imageedit_2_7402640519.png" />
+        </div>
       </div>
       <style jsx>{`
         div {

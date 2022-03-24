@@ -13,6 +13,7 @@ const Home = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const currentUrl = router.asPath;
+  const { nick, isLoggedIn, id } = useSelector((state) => state.auth);
 
   const taskToken = async () => {
     console.log(currentUrl, "page's", "taskToken()");
@@ -32,9 +33,15 @@ const Home = () => {
 
   return (
     <>
-      <div>
-        <img width="380px" height="625px" src="imageedit_2_7402640519.png" />
-      </div>
+      {isLoggedIn ? (
+        <div>
+          <img width="380px" height="625px" src="imageedit_2_7402640519.png" />
+        </div>
+      ) : (
+        <div>
+          <img width="380px" height="800px" src="imageedit_2_7402640519.png" />
+        </div>
+      )}
       <style jsx>{`
         div {
           display: flex;
