@@ -4,16 +4,20 @@ import { useInput } from "../hooks/useInput";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
+import { useEffect } from "react";
+import jwt_decode from "jwt-decode";
 
 const SignIn = () => {
+  console.log("signIn COMOP");
   const router = useRouter();
   const maxLen = (value) => value.length < 50;
   const email = useInput("", maxLen);
   const password = useInput("", maxLen);
   const dispatch = useDispatch();
-  const { loginLoading, loginError, loginDone } = useSelector(
-    (state) => state.user
-  );
+  // const { loginLoading, loginError, loginDone, isLoggedIn } = useSelector(
+  //   (state) => state.auth
+  // );
+
   const onSubmitForm = async () => {
     try {
       dispatch({ type: "LOG_IN_REQUEST" });
@@ -24,16 +28,30 @@ const SignIn = () => {
           password: password.value,
         }
       );
-
+      const token = response.data.data.token;
       if (response.data.status === "success") {
-        dispatch({ type: "LOG_IN_DONE" });
-        axios.defaults.headers.common["x-access-token"] =
-          response.data.data.token;
+        dispatch({
+          type: "LOG_IN_DONE",
+        });
+
+        window.localStorage.setItem("token", token);
+
+        const { exp, id, nick } = jwt_decode(token);
+
+        dispatch({
+          type: "SET_AUTH_INFO",
+          data: {
+            id,
+            nick,
+          },
+        });
+
         if (router.query.returnUrl) {
           router.push(router.query.returnUrl);
         } else {
           router.push("/");
         }
+
         alert("Login Success!");
       }
     } catch (error) {
@@ -43,8 +61,7 @@ const SignIn = () => {
   };
   return (
     <>
-      {loginLoading && <div>loading...</div>}
-      {loginError && <div>아이디와 비밀번호를 확인하세요..</div>}
+      {/* {loginLoading && <div>loading...</div>} */}
       <div>
         <Form onFinish={onSubmitForm}>
           <div>

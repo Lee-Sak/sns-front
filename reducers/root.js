@@ -2,6 +2,7 @@ import { combineReducers } from "redux";
 import { HYDRATE } from "next-redux-wrapper";
 import { post } from "./post";
 import { user } from "./user";
+import { auth } from "./auth";
 // nextjs에서 생성한 redux store와 clinet에서 생성한 redux store 를 합치기 위한
 // reducer가 결합되어 있는 그룹
 export const rootReducer = (state, action) => {
@@ -12,6 +13,7 @@ export const rootReducer = (state, action) => {
       const combineReducer = combineReducers({
         post,
         user,
+        auth,
       });
       return combineReducer(state, action);
     }

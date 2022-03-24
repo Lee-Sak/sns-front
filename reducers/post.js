@@ -58,6 +58,20 @@ const post = (state = initialState, action) => {
         ...state,
         content: action.data,
       };
+    case "UPDATE_LIKE":
+      return {
+        ...state,
+        data: state.data.map((e) => {
+          if (e.id === action.data) {
+            return {
+              ...e,
+              like: e.like + 1,
+            };
+          } else {
+            return e;
+          }
+        }),
+      };
 
     case "DELETE_IMG":
       return {

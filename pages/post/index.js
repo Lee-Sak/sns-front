@@ -2,20 +2,18 @@ import axios from "axios";
 import { PostCard } from "../../components/PostCard";
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import wrapper from "../../store/configureStore";
+import { wrapper } from "../../store/configureStore";
 import { useInput } from "../../hooks/useInput";
 import { useRouter } from "next/router";
 import imageCompression from "browser-image-compression";
+import { checkLogin } from "../../functions/check_token";
+import { getFollower } from "../../functions/check_token";
+import { checkTokenStatus } from "../../functions/check_token";
+import jwt_decode from "jwt-decode";
 
+// SSR을 사용하는 페이지라 STATE가 초기화 됨
 const Post = () => {
-  const maxLen = (value) => value.length < 100;
-
-  const router = useRouter();
-
-  const dispatch = useDispatch();
-
-  // action이 dispatch 될 때마다 selector는 항상 실행
-  // selector의 return 값이 달라지면 useSelector를 사용하는 컴포넌트는 re-render
+  console.log("post comp start");
   const {
     loadPostDone,
     loadPostLoading,
@@ -29,12 +27,46 @@ const Post = () => {
     postId,
     imgId,
     sentence,
+    followerId,
+    followingId,
   } = useSelector((state) => state.post);
 
-  const { isLoggedIn } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const currentUrl = router.asPath;
 
-  const [followerId, setFollowerId] = useState([]);
-  const [followingId, setfollowingId] = useState([]);
+  const taskToken = async () => {
+    console.log(currentUrl, "page's", "taskToken()");
+    const isLogged = await checkTokenStatus();
+    if (isLogged) {
+      // 토큰값 재설정
+      const token = window.localStorage.getItem("token");
+      const { exp, id, nick } = jwt_decode(token);
+
+      dispatch({
+        type: "SET_AUTH_INFO",
+        data: {
+          id,
+          nick,
+        },
+      });
+      getFollower(dispatch, router, currentUrl);
+    } else {
+      dispatch({ type: "DEL_AUTH_INFO" });
+      router.push(`/signIn/?returnUrl=${currentUrl}`);
+    }
+  };
+
+  useEffect(() => {
+    taskToken();
+  }, []);
+
+  // const storage = JSON.parse(localStorage.getItem("persist:root"));
+  // const storageUser = JSON.parse(storage.user);
+  // const jwtToken = storageUser.token;
+
+  // action이 dispatch 될 때마다 selector는 항상 실행
+  // selector의 return 값이 달라지면 useSelector를 사용하는 컴포넌트는 re-render
 
   const onChange = (e) => {
     dispatch({ type: "SET_CONTENT", data: e.target.value });
@@ -44,66 +76,24 @@ const Post = () => {
     dispatch({ type: "SET_SENTENCE", data: e.target.value });
   };
 
-  const getFollower = async () => {
-    const res = await axios.get(`http://${process.env.BACK_IP}/user/follower`, {
-      headers: {
-        Authorization: axios.defaults.headers.common["x-access-token"],
-      },
-    });
-
-    let followerIds = [],
-      followingIds = [];
-
-    let a = [],
-      b = [];
-
-    if (res.data.data) {
-      followerIds = res.data.data.followers.map((e) => {
-        return { id: e.id, nick: e.nickname };
-      });
-      a = res.data.data.followers.map((e) => {
-        return e.id;
-      });
-    }
-
-    const res_1 = await axios.get(
-      `http://${process.env.BACK_IP}/user/following`,
-      {
-        headers: {
-          Authorization: axios.defaults.headers.common["x-access-token"],
-        },
-      }
-    );
-    if (res_1.data.data) {
-      followingIds = res_1.data.data.followings.map((e) => {
-        return { id: e.id, nick: e.nickname };
-      });
-      b = res_1.data.data.followings.map((e) => {
-        return e.id;
-      });
-    }
-
-    dispatch({ type: "follower", data: followerIds });
-    dispatch({ type: "following", data: followingIds });
-
-    setFollowerId(a);
-    setfollowingId(b);
-  };
-
-  useEffect(() => {
-    const currentUrl = router.asPath;
-    if (!isLoggedIn) {
-      router.push(`/signIn/?returnUrl=${currentUrl}`);
-      alert("로그인 먼저 진행하세요");
-    } else {
-      getFollower();
-    }
-  }, []);
   const getPosts = async () => {
-    dispatch({ type: "LOAD_POST_REQUEST" });
-    const postRes = await axios.get(`http://${process.env.BACK_IP}/post`);
-    const datas = postRes.data.data;
-    dispatch({ type: "LOAD_POST_SUCCESS", data: datas });
+    try {
+      dispatch({ type: "LOAD_POST_REQUEST" });
+      const postRes = await axios.get(`http://${process.env.BACK_IP}/post`);
+      const datas = postRes.data.data;
+      dispatch({ type: "LOAD_POST_SUCCESS", data: datas });
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getFollower(dispatch, router, currentUrl);
+          } else {
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
+      }
+    }
   };
 
   // console.log(loadPostLoading);
@@ -122,6 +112,7 @@ const Post = () => {
   };
   const addPost = async () => {
     try {
+      const token = window.localStorage.getItem("token");
       const formData = new FormData();
       for (const e of files) {
         formData.append("files", e);
@@ -132,7 +123,7 @@ const Post = () => {
       const config = {
         headers: {
           "content-type": "multipart/form-data",
-          Authorization: axios.defaults.headers.common["x-access-token"],
+          Authorization: token,
         },
       };
 
@@ -148,8 +139,17 @@ const Post = () => {
         getPosts();
       } else {
       }
-    } catch (error) {
-      console.log(error);
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getFollower(dispatch, router, currentUrl);
+          } else {
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
+      }
     }
   };
 
@@ -198,44 +198,60 @@ const Post = () => {
     dispatch({ type: "DELETE_IMG", data: Number(i) });
   };
   const addUpdate = async () => {
-    const formData = new FormData();
-    for (const e of files) {
-      formData.append("files", e);
-    }
-    formData.append("content", content);
-    formData.append("sentence", sentence);
+    try {
+      const token = window.localStorage.getItem("token");
+      const formData = new FormData();
+      for (const e of files) {
+        formData.append("files", e);
+      }
+      formData.append("content", content);
+      formData.append("sentence", sentence);
 
-    const config = {
-      headers: {
-        "content-type": "multipart/form-data",
-        Authorization: axios.defaults.headers.common["x-access-token"],
-      },
-    };
-
-    const response = await axios.put(
-      `http://${process.env.BACK_IP}/post/` + postId + `?ids=${imgId}`,
-      formData,
-      config
-    );
-    const { status, data } = response.data;
-    if (status === "success") {
-      const post = {
-        id: data.id,
-        content: data.content,
-        user_id: data.user.id,
-        nickname: data.user.nickname,
-        img_url: data.images[0].url,
+      const config = {
+        headers: {
+          "content-type": "multipart/form-data",
+          Authorization: token,
+        },
       };
-      getPosts();
-      // dispatch({ type: "UPDATE_POST_SUCCESS", data: { post, id: data.id } });
 
-      dispatch({ type: "DELETE_POST_FORM" });
-      alert("update success!");
+      const response = await axios.put(
+        `http://${process.env.BACK_IP}/post/` + postId + `?ids=${imgId}`,
+        formData,
+        config
+      );
+      const { status, data } = response.data;
+      if (status === "success") {
+        const post = {
+          id: data.id,
+          content: data.content,
+          user_id: data.user.id,
+          nickname: data.user.nickname,
+          img_url: data.images[0].url,
+        };
+        getPosts();
+        // dispatch({ type: "UPDATE_POST_SUCCESS", data: { post, id: data.id } });
+
+        dispatch({ type: "DELETE_POST_FORM" });
+        alert("update success!");
+      }
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getFollower(dispatch, router, currentUrl);
+          } else {
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
+      }
     }
   };
   // pre(back) redner : back start -> back end
   // client render : clinet -> back start -> back end
   // re render(dispatch) :
+  console.log("post comp end");
+
   return (
     <>
       {loadPostLoading && <div>loading...</div>}
@@ -288,6 +304,7 @@ const Post = () => {
                 getFollower={getFollower}
                 followerId={followerId}
                 followingId={followingId}
+                like={post.like}
               />
             ))}
           </div>
@@ -311,7 +328,6 @@ const Post = () => {
 };
 export const getServerSideProps = wrapper.getServerSideProps(
   async (context) => {
-    console.log("server");
     context.store.dispatch({ type: "LOAD_POST_REQUEST" });
     const postRes = await axios.get(`http://${process.env.BACK_IP}/post`);
     const datas = postRes.data.data;

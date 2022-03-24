@@ -2,26 +2,61 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
+import { checkLogin, getFollower } from "../functions/check_token";
+import { checkTokenStatus } from "../functions/check_token";
 
 const MyPage = () => {
-  const { id, isLoggedIn, email, nick } = useSelector((state) => state.user);
+  const { id, isLoggedIn, nick } = useSelector((state) => state.auth);
   const router = useRouter();
-  const token = axios.defaults.headers.common["x-access-token"];
+  const currentUrl = router.asPath;
   const dispatch = useDispatch();
 
   const [pw, setPw] = useState("");
   const [nickCH, setnickCH] = useState("");
   const [emailCH, setemailCH] = useState("");
 
+  const taskToken = async () => {
+    console.log(currentUrl, "page's", "taskToken()");
+    const isLogged = await checkTokenStatus();
+    if (isLogged) {
+      // 토큰값 재설정
+      getMyInfo();
+      getFollower(dispatch, router, currentUrl);
+    } else {
+      dispatch({ type: "DEL_AUTH_INFO" });
+      router.push(`/signIn/?returnUrl=${currentUrl}`);
+    }
+  };
+
+  useEffect(() => {
+    taskToken();
+  }, []);
+
   const getMyInfo = async () => {
-    const res = await axios.get(`http://${process.env.BACK_IP}/user/` + id, {
-      headers: {
-        Authorization: token,
-      },
-    });
-    const data = res.data.data.email;
-    setnickCH(nick);
-    setemailCH(data);
+    try {
+      console.log("getMyInfo()");
+      const token = window.localStorage.getItem("token");
+      const res = await axios.get(`http://${process.env.BACK_IP}/user/` + id, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      const data = res.data.data.email;
+      setnickCH(nick);
+      setemailCH(data);
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getMyInfo();
+          } else {
+            dispatch({ type: "DEL_AUTH_INFO" });
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
+      }
+    }
   };
 
   const onChangeNick = (e) => {
@@ -34,94 +69,129 @@ const MyPage = () => {
     setemailCH(e.target.value);
   };
 
-  useEffect(() => {
-    try {
-      const currentUrl = router.asPath;
-      if (!isLoggedIn) {
-        router.push(`/signIn/?returnUrl=${currentUrl}`);
-        alert("로그인 먼저 진행하세요");
-      }
-
-      getMyInfo();
-    } catch (e) {
-      console.log(e);
-    }
-  }, []);
-  const tryCatch = (func) => {
-    try {
-      func();
-    } catch (e) {
-      console.log(e);
-    }
-  };
   const onClickEmailUpd = async () => {
-    const res = await axios.put(
-      `http://${process.env.BACK_IP}/user/` + id,
-      {
-        email: emailCH,
-        nickname: nickCH,
-      },
-      {
-        headers: {
-          Authorization: axios.defaults.headers.common["x-access-token"],
+    try {
+      const res = await axios.put(
+        `http://${process.env.BACK_IP}/user/` + id,
+        {
+          email: emailCH,
+          nickname: nickCH,
         },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (res.data.status === "success") alert("수정 성공");
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getMyInfo();
+          } else {
+            dispatch({ type: "DEL_AUTH_INFO" });
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
       }
-    );
-    if (res.data.status === "success") alert("수정 성공");
+    }
   };
 
   const onClickNickUpd = async () => {
-    const res = await axios.put(
-      `http://${process.env.BACK_IP}/user/` + id,
-      {
-        nickname: nickCH,
-      },
-      {
-        headers: {
-          Authorization: axios.defaults.headers.common["x-access-token"],
+    try {
+      const res = await axios.put(
+        `http://${process.env.BACK_IP}/user/` + id,
+        {
+          nickname: nickCH,
         },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (res.data.status === "success") {
+        dispatch({ type: "CH_NICK", data: nickCH });
+        alert("수정 성공");
       }
-    );
-    if (res.data.status === "success") {
-      dispatch({ type: "CH_NICK", data: nickCH });
-      alert("수정 성공");
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getMyInfo();
+          } else {
+            dispatch({ type: "DEL_AUTH_INFO" });
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
+      }
     }
   };
 
   const onClickPwUpd = async () => {
-    const res = await axios.patch(
-      `http://${process.env.BACK_IP}/user/` + id,
-      {
-        password: pw,
-      },
-      {
-        headers: {
-          Authorization: axios.defaults.headers.common["x-access-token"],
+    try {
+      const res = await axios.patch(
+        `http://${process.env.BACK_IP}/user/` + id,
+        {
+          password: pw,
         },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (res.data.status === "success") alert("수정 성공");
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getMyInfo();
+          } else {
+            dispatch({ type: "DEL_AUTH_INFO" });
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
       }
-    );
-    if (res.data.status === "success") alert("수정 성공");
+    }
   };
 
   return (
     <>
-      <div className="a">
-        <div>
-          이메일: &nbsp;
-          <input type="text" onChange={onChangeEmail} value={emailCH} />
-          <button onClick={() => tryCatch(onClickEmailUpd)}>수정</button>
+      {isLoggedIn && (
+        <div className="a">
+          <div>
+            이메일: &nbsp;
+            <input type="text" onChange={onChangeEmail} value={emailCH} />
+            <button onClick={onClickEmailUpd}>수정</button>
+          </div>
+          <div>
+            닉네임: &nbsp;
+            <input type="text" onChange={onChangeNick} value={nickCH} />
+            <button onClick={onClickNickUpd}>수정</button>
+          </div>
+          <div>
+            비밀번호: &nbsp;
+            <input
+              type="password"
+              placeholder="패스워드"
+              onChange={onChangePw}
+            />
+            <button onClick={onClickPwUpd}>수정</button>
+          </div>
+          <div>
+            <img
+              width="380px"
+              height="510px"
+              src="imageedit_2_7402640519.png"
+            />
+          </div>
         </div>
-        <div>
-          닉네임: &nbsp;
-          <input type="text" onChange={onChangeNick} value={nickCH} />
-          <button onClick={() => tryCatch(onClickNickUpd)}>수정</button>
-        </div>
-        <div>
-          비밀번호: &nbsp;
-          <input type="password" placeholder="패스워드" onChange={onChangePw} />
-          <button onClick={() => tryCatch(onClickPwUpd)}>수정</button>
-        </div>
-      </div>
+      )}
       <style jsx>{`
         div.a {
           display: flex;
@@ -132,6 +202,9 @@ const MyPage = () => {
           padding-bottom: 10px;
           box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
             rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+        }
+        img {
+          opacity: 0.8;
         }
       `}</style>
     </>

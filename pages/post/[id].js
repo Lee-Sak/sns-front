@@ -7,12 +7,17 @@ import { useInput } from "../../hooks/useInput";
 import { useRouter } from "next/router";
 import { Card } from "antd";
 import "antd/dist/antd.css";
+import { checkTokenStatus } from "../../functions/check_token";
+import { getFollower } from "../../functions/check_token";
 
 const Detail = () => {
   const router = useRouter();
+  const currentUrl = "/post";
+
   const { id } = router.query;
   const dispatch = useDispatch();
-  const userId = useSelector((state) => state.user.id);
+  const userId = useSelector((state) => state.auth.id);
+
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -25,115 +30,183 @@ const Detail = () => {
   const [statusAddRefCom, setStatusAddRefCom] = useState(false);
   const [subcommentojb, setsubcommentojb] = useState([]);
 
+  const taskToken = async () => {
+    console.log(currentUrl, "page's", "taskToken()");
+    const isLogged = await checkTokenStatus();
+    if (isLogged) {
+      getFollower(dispatch, router, currentUrl);
+      getPostOne();
+    } else {
+      dispatch({ type: "DEL_AUTH_INFO" });
+      router.push(`/signIn/?returnUrl=${currentUrl}`);
+    }
+  };
+
+  useEffect(() => {
+    taskToken();
+  }, []);
+
   const getPostOne = async () => {
-    setLoading(true);
-    const postRes = await axios.get(`http://${process.env.BACK_IP}/post/${id}`);
-    const datas = postRes.data.data;
+    try {
+      setLoading(true);
+      const postRes = await axios.get(
+        `http://${process.env.BACK_IP}/post/${id}`
+      );
+      const datas = postRes.data.data;
 
-    const commentRes = await axios.get(
-      `http://${process.env.BACK_IP}/post/${id}/comment`
-    );
-    const commentsData = commentRes.data.data;
-    console.log(commentsData);
+      const commentRes = await axios.get(
+        `http://${process.env.BACK_IP}/post/${id}/comment`
+      );
+      const commentsData = commentRes.data.data;
 
-    const array_ = [];
-    for (const e of commentsData) {
-      if (e.subComment.length > 0) {
-        const postRes = await axios.get(
-          `http://${process.env.BACK_IP}/post/${e.id}/subcomment`
-        );
-        console.log("postRes:", postRes);
-        if (postRes.data.status === "success") {
-          const data = postRes.data.data;
-          const subarray = data.map((data) => {
-            return {
-              id: data.id,
-              sub_comment: data.sub_comment,
-              user_nick: data.user.nickname,
-              user_id: data.user.id,
-            };
-          });
+      const array_ = [];
+      for (const e of commentsData) {
+        if (e.subComment.length > 0) {
+          const postRes = await axios.get(
+            `http://${process.env.BACK_IP}/post/${e.id}/subcomment`
+          );
 
+          if (postRes.data.status === "success") {
+            const data = postRes.data.data;
+            const subarray = data.map((data) => {
+              return {
+                id: data.id,
+                sub_comment: data.sub_comment,
+                user_nick: data.user.nickname,
+                user_id: data.user.id,
+              };
+            });
+
+            array_.push({
+              ...e,
+              subarray,
+            });
+          }
+        } else {
+          const subarray = [];
           array_.push({
             ...e,
             subarray,
           });
         }
-      } else {
-        const subarray = [];
-        array_.push({
-          ...e,
-          subarray,
-        });
+      }
+
+      setPost(datas);
+      setComments(array_);
+
+      setLoading(false);
+
+      setDone(true);
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getFollower(dispatch, router, currentUrl);
+          } else {
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
       }
     }
-    console.log("array:", array_);
-
-    setPost(datas);
-    setComments(array_);
-
-    setLoading(false);
-
-    setDone(true);
   };
 
   const onClickDelete = async (id) => {
-    console.log(id);
-    const deleteRes = await axios.delete(
-      `http://${process.env.BACK_IP}/post/comment/` + id,
-      {
-        headers: {
-          Authorization: axios.defaults.headers.common["x-access-token"],
-        },
-      }
-    );
-    if (deleteRes.data.status === "success") {
-      alert("정상적으로 삭제되었습니다.");
-      getPostOne();
+    try {
+      const token = window.localStorage.getItem("token");
+      const deleteRes = await axios.delete(
+        `http://${process.env.BACK_IP}/post/comment/` + id,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (deleteRes.data.status === "success") {
+        alert("정상적으로 삭제되었습니다.");
+        getPostOne();
 
-      // setComments((prev) => prev.filter((comm) => comm.id !== id));
+        // setComments((prev) => prev.filter((comm) => comm.id !== id));
+      }
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getFollower(dispatch, router, currentUrl);
+          } else {
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
+      }
     }
   };
 
   const onClick = async () => {
-    const deleteRes = await axios.delete(
-      `http://${process.env.BACK_IP}/post/` + id,
-      {
-        headers: {
-          Authorization: axios.defaults.headers.common["x-access-token"],
-        },
+    try {
+      const token = window.localStorage.getItem("token");
+      const deleteRes = await axios.delete(
+        `http://${process.env.BACK_IP}/post/` + id,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (deleteRes.data.status === "success") {
+        dispatch({ type: "DELETE_POST", data: Number(id) });
+        alert("삭제 되었습니다.");
+        router.push("/post");
       }
-    );
-    if (deleteRes.data.status === "success") {
-      dispatch({ type: "DELETE_POST", data: Number(id) });
-      alert("삭제 되었습니다.");
-      router.push("/post");
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getFollower(dispatch, router, currentUrl);
+          } else {
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
+      }
     }
   };
   const oneClickBack = () => {
     router.push("/post");
   };
-  useEffect(() => {
-    getPostOne();
-  }, []);
+
   const onChangeComment = (e) => {
     setCommentText(e.target.value);
   };
 
   const onClickComment = async () => {
-    const commentPost = await axios.post(
-      `http://${process.env.BACK_IP}/post/${id}/comment`,
-      { comment: commentText },
-      {
-        headers: {
-          Authorization: axios.defaults.headers.common["x-access-token"],
-        },
-      }
-    );
-    if (commentPost.data.status === "success") {
-      getPostOne();
+    try {
+      const token = window.localStorage.getItem("token");
+      const commentPost = await axios.post(
+        `http://${process.env.BACK_IP}/post/${id}/comment`,
+        { comment: commentText },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (commentPost.data.status === "success") {
+        getPostOne();
 
-      setCommentText("");
+        setCommentText("");
+      }
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getFollower(dispatch, router, currentUrl);
+          } else {
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
+      }
     }
   };
   const onChangeServe = (e) => {
@@ -141,19 +214,34 @@ const Detail = () => {
   };
 
   const onClickPostServeComment = async (commentId) => {
-    const commentPost = await axios.post(
-      `http://${process.env.BACK_IP}/post/${commentId}/subcomment`,
-      { sub_comment: subComment },
-      {
-        headers: {
-          Authorization: axios.defaults.headers.common["x-access-token"],
-        },
+    try {
+      const token = window.localStorage.getItem("token");
+
+      const commentPost = await axios.post(
+        `http://${process.env.BACK_IP}/post/${commentId}/subcomment`,
+        { sub_comment: subComment },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (commentPost.data.status === "success") {
+        getPostOne();
+        setSubComment("");
+        setStatusAddRefCom(false);
       }
-    );
-    if (commentPost.data.status === "success") {
-      getPostOne();
-      setSubComment("");
-      setStatusAddRefCom(false);
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getFollower(dispatch, router, currentUrl);
+          } else {
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
+      }
     }
   };
 
@@ -182,17 +270,32 @@ const Detail = () => {
   };
 
   const onClickDelSub = async (id) => {
-    const deleteRes = await axios.delete(
-      `http://${process.env.BACK_IP}/post/comment/subcomment/` + id,
-      {
-        headers: {
-          Authorization: axios.defaults.headers.common["x-access-token"],
-        },
+    try {
+      const token = window.localStorage.getItem("token");
+
+      const deleteRes = await axios.delete(
+        `http://${process.env.BACK_IP}/post/comment/subcomment/` + id,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (deleteRes.data.status === "success") {
+        alert("정상적으로 삭제되었습니다.");
+        getPostOne();
       }
-    );
-    if (deleteRes.data.status === "success") {
-      alert("정상적으로 삭제되었습니다.");
-      getPostOne();
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getFollower(dispatch, router, currentUrl);
+          } else {
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
+      }
     }
   };
   return (
@@ -202,7 +305,10 @@ const Detail = () => {
         <>
           <div className="a">
             <h1>Post:</h1>
-            <Card title={post.content} style={{ width: 300 }}>
+            <Card
+              title={post.content}
+              style={{ width: 300, backgroundColor: "#778899" }}
+            >
               <div className="a">
                 {post.images.map((e) => {
                   return <img src={e.url} key={e.id} />;
@@ -232,6 +338,7 @@ const Detail = () => {
               return (
                 <div key={e.id} ref={(elem) => (carouselRef.current[i] = elem)}>
                   <Card
+                    size="small"
                     title={`Writer [${e.nick}]`}
                     style={{ width: 300, background: "#ffe4c4" }}
                   >
@@ -258,6 +365,7 @@ const Detail = () => {
                       return (
                         <div key={e.id}>
                           <Card
+                            size="small"
                             title={`Writer [${e.user_nick}]`}
                             style={{
                               width: 200,

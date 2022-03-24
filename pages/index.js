@@ -1,12 +1,39 @@
 import Head from "next/head";
 import Image from "next/image";
+import { useEffect } from "react";
 import styles from "../styles/Home.module.css";
+import { useSelector, useDispatch } from "react-redux";
+import { useRouter } from "next/router";
+import { checkTokenStatus } from "../functions/check_token";
+import { checkLogin, getFollower } from "../functions/check_token";
 
+// SSR을 사용하지 않는 페이지는 redux-persist 모듈이 작동되어 새로고침을 하여도
+// 지정한 store의 값은 유지 됨.
 const Home = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const currentUrl = router.asPath;
+
+  const taskToken = async () => {
+    console.log(currentUrl, "page's", "taskToken()");
+    const isLogged = await checkTokenStatus();
+    if (isLogged) {
+      // 토큰값 재설정
+      getFollower(dispatch, router, currentUrl);
+    } else {
+      dispatch({ type: "DEL_AUTH_INFO" });
+      // router.push(`/signIn/?returnUrl=${currentUrl}`);
+    }
+  };
+
+  useEffect(() => {
+    taskToken();
+  }, []);
+
   return (
     <>
       <div>
-        <img width="380px" height="600px" src="246BD24252FF853D15.jpg" />
+        <img width="380px" height="625px" src="imageedit_2_7402640519.png" />
       </div>
       <style jsx>{`
         div {

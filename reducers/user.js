@@ -2,13 +2,11 @@ const initialState = {
   loginLoading: false,
   loginError: false,
   loginDone: false,
-  isLoggedIn: false,
-  id: "",
-  nick: "",
+
   follower: [],
   following: [],
-
-  email: "",
+  followerId: [],
+  followingId: [],
 };
 
 const user = (state = initialState, action) => {
@@ -36,7 +34,6 @@ const user = (state = initialState, action) => {
         ...state,
         loginLoading: false,
         loginDone: true,
-        isLoggedIn: true,
       };
     case "LOG_IN_ERROR":
       return {
@@ -44,6 +41,7 @@ const user = (state = initialState, action) => {
         loginError: true,
         loginLoading: false,
       };
+
     case "CH_NICK":
       return {
         ...state,
@@ -53,27 +51,23 @@ const user = (state = initialState, action) => {
     case "SET_USER_INFO":
       return {
         ...state,
-        id: action.data.id,
-        nick: action.data.nickname,
+        id: action.data,
+        nick: action.nick,
         isLoggedIn: true,
       };
-    case "LOGOUT":
+    case "DEL_USER_INFO":
+      return {
+        ...initialState,
+      };
+    case "FOLLOW":
       return {
         ...state,
-        id: "",
-        nick: "",
-        isLoggedIn: false,
+        follower: [...action.data.followerIds],
+        following: [...action.data.followingIds],
+        followerId: [...action.data.a],
+        followingId: [...action.data.b],
       };
-    case "follower":
-      return {
-        ...state,
-        follower: [...action.data],
-      };
-    case "following":
-      return {
-        ...state,
-        following: [...action.data],
-      };
+
     case "GET_MYINFO":
       return {
         ...state,

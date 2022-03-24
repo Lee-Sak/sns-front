@@ -6,10 +6,10 @@ import axios from "axios";
 import { Card } from "antd";
 import "antd/dist/antd.css";
 
-const UserProfile = ({ token, getFollower }) => {
-  const { nick, isLoggedIn, follower, following } = useSelector(
-    (state) => state.user
-  );
+const UserProfile = ({}) => {
+  const { nick, isLoggedIn, id } = useSelector((state) => state.auth);
+  const { follower, following } = useSelector((state) => state.user);
+
   const [status, setStatus] = useState(false);
   const onClick = () => {
     setStatus(true);
@@ -24,7 +24,7 @@ const UserProfile = ({ token, getFollower }) => {
           <Card
             title={`${nick}님`}
             extra={<a onClick={onClick}>More</a>}
-            style={{ width: 170 }}
+            style={{ width: 170, backgroundColor: "	#778899	" }}
           >
             <p>follower : {follower?.length}</p>
             <p>following : {following?.length}</p>

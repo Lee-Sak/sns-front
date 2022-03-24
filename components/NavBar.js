@@ -5,12 +5,14 @@ import axios from "axios";
 
 const NavBar = () => {
   const router = useRouter();
-  const token = axios.defaults.headers.common["x-access-token"];
   const dispatch = useDispatch();
-  const { isLoggedIn } = useSelector((state) => state.user);
+  const { isLoggedIn } = useSelector((state) => state.auth);
   const onClick = () => {
-    axios.defaults.headers.common["x-access-token"] = "";
-    dispatch({ type: "LOGOUT" });
+    window.localStorage.removeItem("token");
+
+    dispatch({ type: "DEL_AUTH_INFO" });
+    dispatch({ type: "DEL_USER_INFO" });
+
     router.push("/");
     alert("logout success!");
   };
@@ -35,7 +37,7 @@ const NavBar = () => {
               Post
             </a>
           </Link>
-          {token ? (
+          {isLoggedIn ? (
             <Link href="/mypage">
               <a className={router.pathname === "/mypage" ? "active" : ""}>
                 Mapage
