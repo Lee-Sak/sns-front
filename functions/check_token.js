@@ -21,13 +21,13 @@ export const checkTokenStatus = async () => {
       // token이 만료 돼었을 때
       if (Date.now() >= exp * 1000) {
         window.localStorage.removeItem("token");
-        alert("세션이 만료되었습니다.");
-        if (confirm("연장하시겠어요?")) {
+        if (confirm("세션이 만료되었습니다. 연장하시겠어요?")) {
           const refreshTok = await refreshToken(id);
           window.localStorage.setItem("token", refreshTok);
 
           return true;
         } else {
+          alert("로그인 해주세요. (Not Valid Token) ");
           return false;
         }
         // token이 만료돼지 않았을 때
@@ -38,7 +38,7 @@ export const checkTokenStatus = async () => {
       console.log("test error:", e);
     }
   } else {
-    console.log("token이 존재하지 않습니다");
+    alert("로그인 해주세요. (Not Have Token)");
     return false;
   }
 };
