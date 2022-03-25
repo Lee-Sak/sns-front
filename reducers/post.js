@@ -1,3 +1,5 @@
+import { dateToString } from "../functions/check_token";
+
 const initialState = {
   loadPostLoading: false,
   loadPostError: null,
@@ -45,7 +47,28 @@ const post = (state = initialState, action) => {
         addPostStatus: false,
         data: [...action.data],
       };
-
+    case "UPDATE_DATE":
+      return {
+        ...state,
+        data: state.data.map((e) => {
+          const value = new Date(e.createdAt);
+          return {
+            ...e,
+            createdAt:
+              value.getFullYear() +
+              "-" +
+              (value.getMonth() + 1) +
+              "-" +
+              value.getDate() +
+              " " +
+              value.getHours() +
+              ":" +
+              value.getMinutes() +
+              ":" +
+              value.getSeconds(),
+          };
+        }),
+      };
     case LOAD_POST_ERROR:
       return {
         ...state,

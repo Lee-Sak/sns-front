@@ -168,3 +168,21 @@ export const getFollower = async (dispatch, router, currentUrl) => {
     }
   }
 };
+
+export const dateToString = (date, num) => {
+  const value = new Date(date);
+  console.log(value);
+  return (
+    value.getFullYear() +
+    "-" +
+    (value.getMonth() + 1) +
+    "-" +
+    value.getDate() +
+    " " +
+    (value.getHours() + num) +
+    ":" +
+    value.getMinutes() +
+    ":" +
+    value.getSeconds()
+  );
+};

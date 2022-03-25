@@ -35,6 +35,9 @@ const Post = () => {
   const router = useRouter();
   const currentUrl = router.asPath;
 
+  const [requestIp, setRequestIp] = useState(false);
+  const [responseIp, setResponseIp] = useState(false);
+
   const taskToken = async () => {
     console.log(currentUrl, "page's", "taskToken()");
     const isLogged = await checkTokenStatus();
@@ -51,10 +54,20 @@ const Post = () => {
         },
       });
       getFollower(dispatch, router, currentUrl);
+      getUserIp();
     } else {
       dispatch({ type: "DEL_AUTH_INFO" });
       router.push(`/signIn/?returnUrl=${currentUrl}`);
     }
+  };
+
+  const getUserIp = async () => {
+    // const res = await axios.get("https://geolocation-db.com/json/");
+    // const country = res.data.country_code;
+    dispatch({
+      type: "UPDATE_DATE",
+    });
+    setResponseIp(true);
   };
 
   useEffect(() => {
@@ -82,6 +95,12 @@ const Post = () => {
       const postRes = await axios.get(`http://${process.env.BACK_IP}/post`);
       const datas = postRes.data.data;
       dispatch({ type: "LOAD_POST_SUCCESS", data: datas });
+      // const res = await axios.get("https://geolocation-db.com/json/");
+      // const country = res.data.country_code;
+      dispatch({
+        type: "UPDATE_DATE",
+      });
+      setResponseIp(true);
     } catch (e) {
       if (e.response) {
         if (e.response.status === 401) {
@@ -288,7 +307,7 @@ const Post = () => {
           <button>선택삭제</button>
         </div>
       )}
-      {loadPostDone && (
+      {loadPostDone && responseIp && (
         <>
           <div>
             {data?.map((post, i) => (
@@ -305,6 +324,7 @@ const Post = () => {
                 followerId={followerId}
                 followingId={followingId}
                 like={post.like}
+                createdAt={post.createdAt}
               />
             ))}
           </div>
@@ -329,7 +349,12 @@ const Post = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
   async (context) => {
     context.store.dispatch({ type: "LOAD_POST_REQUEST" });
-    const postRes = await axios.get(`http://${process.env.BACK_IP}/post`);
+    const postRes = await axios.get(`http://${process.env.BACK_IP}/post`, {
+      headers: {
+        Authorization:
+          "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaXAiOiI6OjEiLCJlbWFpbCI6InNha0BuYXZlci5jb20iLCJuaWNrIjoic2FrIiwiaWF0IjoxNjQ4MTgyNjU0LCJleHAiOjE2NDgxODYyNTR9.VStPYiLX6v-hn-8U5Nl0m551abhO2gRLA8qAWJPJEOw",
+      },
+    });
     const datas = postRes.data.data;
     context.store.dispatch({ type: "LOAD_POST_SUCCESS", data: datas });
   }

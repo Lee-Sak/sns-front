@@ -18,6 +18,7 @@ const PostCard = ({
   followerId,
   followingId,
   like,
+  createdAt,
 }) => {
   const { id } = useSelector((state) => state.auth);
   const { detailPostStatus, setDetialPostStatus } = useState(false);
@@ -246,6 +247,7 @@ const PostCard = ({
             <button onClick={() => onClick(postId)} style={{ float: "right" }}>
               삭제
             </button>
+            <div>{createdAt}</div>
           </>
         )}
       </Card>
