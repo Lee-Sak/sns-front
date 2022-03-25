@@ -69,6 +69,12 @@ const post = (state = initialState, action) => {
           };
         }),
       };
+
+    case "LOADING_FALSE":
+      return {
+        ...state,
+        loadPostLoading: false,
+      };
     case LOAD_POST_ERROR:
       return {
         ...state,

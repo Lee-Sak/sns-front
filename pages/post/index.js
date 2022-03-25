@@ -37,6 +37,13 @@ const Post = () => {
 
   const [requestIp, setRequestIp] = useState(false);
   const [responseIp, setResponseIp] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [option, setOption] = useState("content");
+  const [notdata, setNotData] = useState(false);
+
+  const onChangeSearchValue = (e) => {
+    setSearchValue(e.target.value);
+  };
 
   const taskToken = async () => {
     console.log(currentUrl, "page's", "taskToken()");
@@ -91,6 +98,8 @@ const Post = () => {
 
   const getPosts = async () => {
     try {
+      setResponseIp(false);
+
       dispatch({ type: "LOAD_POST_REQUEST" });
       const postRes = await axios.get(`http://${process.env.BACK_IP}/post`);
       const datas = postRes.data.data;
@@ -270,10 +279,63 @@ const Post = () => {
   // client render : clinet -> back start -> back end
   // re render(dispatch) :
   console.log("post comp end");
-
+  const handlerChange = (e) => {
+    console.log(e.target.value);
+    setOption(e.target.value);
+  };
+  const searchGetApi = async () => {
+    try {
+      setNotData(false);
+      setResponseIp(false);
+      dispatch({ type: "LOAD_POST_REQUEST" });
+      const postRes = await axios.get(
+        `http://${process.env.BACK_IP}/post/col?col=${option}&val=${searchValue}`
+      );
+      const datas = postRes.data.data;
+      if (datas) {
+        dispatch({ type: "LOAD_POST_SUCCESS", data: datas });
+        // const res = await axios.get("https://geolocation-db.com/json/");
+        // const country = res.data.country_code;
+        dispatch({
+          type: "UPDATE_DATE",
+        });
+        setResponseIp(true);
+      } else {
+        dispatch({
+          type: "LOADING_FALSE",
+        });
+        setNotData(true);
+      }
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 401) {
+          const isLogged = await checkTokenStatus();
+          if (isLogged) {
+            getFollower(dispatch, router, currentUrl);
+          } else {
+            router.push(`/signIn/?returnUrl=${currentUrl}`);
+          }
+        }
+      }
+    }
+  };
   return (
     <>
       {loadPostLoading && <div>loading...</div>}
+      <div>
+        <select onChange={handlerChange} name="job">
+          <option value="content">제목</option>
+          <option value="hashtag">해시태그</option>
+        </select>
+        <p>
+          <input
+            type="text"
+            onChange={onChangeSearchValue}
+            value={searchValue}
+          ></input>
+          <button onClick={searchGetApi}>검색</button>
+        </p>
+      </div>
       {addPostStatus ? (
         <div>
           <h2>이미지 미리보기</h2>
@@ -303,10 +365,12 @@ const Post = () => {
         </div>
       ) : (
         <div>
-          <button onClick={addPostForm}>추가</button>
-          <button>선택삭제</button>
+          <p>
+            <button onClick={addPostForm}>게시글 추가</button>
+          </p>
         </div>
       )}
+      {notdata && <div>검색결과가 없습니다</div>}
       {loadPostDone && responseIp && (
         <>
           <div>

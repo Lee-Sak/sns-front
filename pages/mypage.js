@@ -71,6 +71,7 @@ const MyPage = () => {
 
   const onClickEmailUpd = async () => {
     try {
+      const token = window.localStorage.getItem("token");
       const res = await axios.put(
         `http://${process.env.BACK_IP}/user/` + id,
         {
@@ -83,7 +84,10 @@ const MyPage = () => {
           },
         }
       );
-      if (res.data.status === "success") alert("수정 성공");
+      if (res.data.status === "success") {
+        alert("수정 성공. 변경된 정보로 로그인하세요.");
+        router.push(`/signIn/?returnUrl=${currentUrl}`);
+      }
     } catch (e) {
       if (e.response) {
         if (e.response.status === 401) {
@@ -101,6 +105,7 @@ const MyPage = () => {
 
   const onClickNickUpd = async () => {
     try {
+      const token = window.localStorage.getItem("token");
       const res = await axios.put(
         `http://${process.env.BACK_IP}/user/` + id,
         {
@@ -133,6 +138,7 @@ const MyPage = () => {
 
   const onClickPwUpd = async () => {
     try {
+      const token = window.localStorage.getItem("token");
       const res = await axios.patch(
         `http://${process.env.BACK_IP}/user/` + id,
         {
@@ -144,7 +150,10 @@ const MyPage = () => {
           },
         }
       );
-      if (res.data.status === "success") alert("수정 성공");
+      if (res.data.status === "success") {
+        alert("수정 성공. 변경된 정보로 로그인하세요.");
+        router.push(`/signIn/?returnUrl=${currentUrl}`);
+      }
     } catch (e) {
       if (e.response) {
         if (e.response.status === 401) {

@@ -2,6 +2,7 @@ const initialState = {
   id: "",
   nick: "",
   isLoggedIn: false,
+  email: "",
 };
 
 const auth = (state = initialState, action) => {
@@ -16,6 +17,18 @@ const auth = (state = initialState, action) => {
       return {
         ...initialState,
       };
+
+    case "CH_NICK":
+      return {
+        ...state,
+        nick: action.data,
+      };
+    case "CH_EMAIL":
+      return {
+        ...state,
+        email: action.data,
+      };
+
     default:
       return state;
   }
